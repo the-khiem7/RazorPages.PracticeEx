@@ -1,0 +1,89 @@
+﻿@page
+@model LionPetManagement_StudentName.Pages.LionProfile.IndexModel
+
+@{
+    ViewData["Title"] = "Lion Profiles";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Lion Profiles</h2>
+    <div>
+        <span class="me-3">Welcome, @HttpContext.Session.GetString("UserEmail")</span>
+        <form method="post" class="d-inline">
+            <button type="submit" asp-page-handler="Logout" class="btn btn-outline-danger btn-sm">Logout</button>
+        </form>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @Model.ErrorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@* @if (Model.IsManager) *@
+@* { *@
+<a asp-page="Create" class="btn btn-primary mb-3">Create New</a>
+@* } *@
+
+<a asp-page="Search" class="btn btn-info mb-3">Search</a>
+
+<table class="table table-striped table-hover table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Lion Name</th>
+            <th>Weight</th>
+            <th>Lion Type</th>
+            <th>Modified Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var profile in Model.LionProfiles)
+        {
+            <tr>
+                <td>@profile.LionName</td>
+                <td>@profile.Weight</td>
+                <td>@profile.LionType?.LionTypeName</td>
+                <td>@profile.ModifiedDate.ToString("dd/MM/yyyy")</td>
+                <td>
+                    <a asp-page="Detail" asp-route-id="@profile.LionProfileId" class="btn btn-sm btn-info">Detail</a>
+                    @* @if (Model.IsManager) *@
+                    @* { *@
+                    <a asp-page="Update" asp-route-id="@profile.LionProfileId" class="btn btn-sm btn-warning">Update</a>
+                    <a asp-page="Delete" asp-route-id="@profile.LionProfileId" class="btn btn-sm btn-danger">Delete</a>
+                    @* } *@
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<nav>
+    <ul class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                <a class="page-link" asp-page="Index" asp-route-pageNumber="@i">@i</a>
+            </li>
+        }
+    </ul>
+</nav>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/signalHub")
+            .build();
+
+        connection.on("RefreshData", (operation) => {
+            location.reload();
+        });
+
+        connection.start()
+            .catch(err => console.error(err.toString()));
+    </script>
+}

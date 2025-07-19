@@ -1,0 +1,70 @@
+﻿@page
+@model LionPetManagement_StudentName.Pages.LionProfile.SearchModel
+@{
+}
+<h2>Search Lion Profiles</h2>
+
+<form method="post">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label asp-for="Weight" class="form-label"></label>
+                <input asp-for="Weight" class="form-control" type="number" step="0.1" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="LionTypeName" class="form-label">Lion Type Name</label>
+                <input asp-for="LionTypeName" class="form-control" />
+            </div>
+
+            <div class="form-group mb-3">
+                <button type="submit" class="btn btn-primary">Search</button>
+                <a asp-page="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@if (Model.HasSearched)
+{
+    <hr />
+    <h4>Search Results (@Model.LionProfiles.Count results found)</h4>
+
+    @if (Model.LionProfiles.Any())
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Lion Name</th>
+                    <th>Weight</th>
+                    <th>Lion Type</th>
+                    <th>Modified Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var profile in Model.LionProfiles)
+                {
+                    <tr>
+                        <td>@profile.LionName</td>
+                        <td>@profile.Weight</td>
+                        <td>@profile.LionType?.LionTypeName</td>
+                        <td>@profile.ModifiedDate.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            <a asp-page="Detail" asp-route-id="@profile.LionProfileId" class="btn btn-sm btn-info">Detail</a>
+                            @if (Model.IsManager)
+                            {
+                                <a asp-page="Update" asp-route-id="@profile.LionProfileId" class="btn btn-sm btn-warning">Update</a>
+                                <a asp-page="Delete" asp-route-id="@profile.LionProfileId" class="btn btn-sm btn-danger">Delete</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p class="text-muted">No lion profiles found matching your search criteria.</p>
+    }
+}
