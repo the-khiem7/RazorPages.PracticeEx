@@ -152,7 +152,7 @@ public class GenericRepository<T> where T : class
 ### **B11**: Set up program cs
 
 **Ngay dưới AddRazorPage**
-
+```csharp
 builder.Services.AddScoped<ILionProfileService, LionProfileService>();  
 builder.Services.AddScoped<ILionTypeService, LionTypeService>();  
 builder.Services.AddScoped<ILionAccountService, LionAccountService>();  
@@ -163,10 +163,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Forbidden";  
         options.ExpireTimeSpan = TimeSpan.FromMinutes(5);  
     });
-
+```
 **Dưới MapRazorPage**  
+```csharp
 app.MapRazorPages().RequireAuthorization();
-
+```
 ### **B12**: Set startup project
 
 ### 
@@ -664,9 +665,9 @@ public class SearchModel : PageModel
 ### builder.Services.AddSignalR();
 
 #### **và dưới RequireAuthentication**
-
+```csharp
 app.MapHub<LionPetManagementHub>("/LionPetManagementHub");
-
+```
 ### 
 
 ### **B27** Tạo class xxxHub
