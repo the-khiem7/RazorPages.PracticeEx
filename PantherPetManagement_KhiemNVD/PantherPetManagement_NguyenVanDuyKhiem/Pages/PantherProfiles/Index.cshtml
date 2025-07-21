@@ -1,0 +1,137 @@
+﻿@page
+@model PantherPetManagement_NguyenVanDuyKhiem.Pages.PantherProfiles.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table" id="itemTable">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.PantherProfile[0].PantherName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PantherProfile[0].Weight)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PantherProfile[0].Characteristics)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PantherProfile[0].Warning)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PantherProfile[0].ModifiedDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PantherProfile[0].PantherType)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="pantherProfileTBodyId">
+@foreach (var item in Model.PantherProfile) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.PantherName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Weight)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Characteristics)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Warning)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ModifiedDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PantherType.Description)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.PantherProfileId">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.PantherProfileId">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.PantherProfileId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+@if (Model.PantherProfile.Count > 3)
+{
+    <nav>
+        <ul class="pagination" id="paginationContainer"></ul>
+    </nav>
+
+}
+@section Scripts {
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const pageSize = 3;
+            const rows = document.querySelectorAll('#pantherProfileTBodyId tr'); //
+            const totalRows = rows.length;
+            const totalPages = Math.ceil(totalRows / pageSize);
+            const paginationContainer = document.getElementById('paginationContainer');
+            let currentPage = 1;
+
+            function showPage(page) {
+                const startIndex = (page - 1) * pageSize;
+                rows.forEach((row, index) => {
+                    row.style.display = (index >= startIndex && index < startIndex + pageSize) ? '' : 'none';
+                });
+                if (paginationContainer) {
+                    paginationContainer.querySelectorAll('.page-item').forEach((item, idx) => {
+                        if (idx === page - 1) {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    });
+                }
+                currentPage = page;
+            }
+
+            if (paginationContainer) {
+                paginationContainer.innerHTML = '';
+                for (let i = 1; i <= totalPages; i++) {
+                    const li = document.createElement('li');
+                    li.className = 'page-item';
+                    const a = document.createElement('a');
+                    a.className = 'page-link';
+                    a.href = '#';
+                    a.innerText = i;
+                    a.onclick = function () {
+                        showPage(i);
+                        return false;
+                    };
+                    li.appendChild(a);
+                    paginationContainer.appendChild(li);
+                }
+            }
+            showPage(1);
+
+            var connection = new signalR.HubConnectionBuilder().withUrl("/PantherProfileHub").build();
+
+            connection.start().then(function () {
+                console.log("Connected to the SignalR Hub");
+            }).catch(function (err) {
+                return console.error(err.toString());
+            });
+
+            connection.on("Receiver_DeleteProfileService", function (PantherProfileId) {
+                $('#pantherProfileTBodyId').find(`tr[id='${PantherProfileId}']`).remove();
+                // Refresh pagination after deletion
+                showPage(currentPage);
+            });
+        });
+    </script>
+}
